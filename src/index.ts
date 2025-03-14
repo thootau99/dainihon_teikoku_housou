@@ -7,12 +7,19 @@ import DisTube, { Events } from "distube";
 
 config();
 
+function shuffleArray(array: Array<any>) {
+  for (let i = array.length - 1; i >= 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 const TOKEN = process.env.TOKEN!;
 const GUILD_ID = process.env.GUILD_ID!;
 const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID!;
 const GUNKA_URL_PATH: string = process.env.GUNKA_PATH || "";
 const KIMI_GA_YO_URL =
-  "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo?in=benjamin-nageotte/sets/hot";
+  "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
 // JSONから音源URLを読み込み
 
 const client = new Client({
@@ -21,6 +28,8 @@ const client = new Client({
 const distube = new DisTube(client, {
   plugins: [new SoundCloudPlugin()], // SoundCloudプラグインを追加
 });
+
+let gunkaUrls: Array<string> = [];
 
 client.once("ready", async () => {
   console.log(`${client.user?.tag} 出撃準備完了！`);
@@ -38,11 +47,13 @@ client.once("ready", async () => {
 
     // ランダムにURLを選んで再生
     const playGunka = async () => {
-      const gunkaUrls = JSON.parse(
-        fs.readFileSync(GUNKA_URL_PATH, "utf-8")
-      ).urls;
-      const randomIndex = Math.floor(Math.random() * gunkaUrls.length); // ランダムにURLを選ぶ
-      const selectedUrl = gunkaUrls[randomIndex];
+      if (gunkaUrls.length === 0) {
+        gunkaUrls = JSON.parse(fs.readFileSync(GUNKA_URL_PATH, "utf-8")).urls;
+        shuffleArray(gunkaUrls);
+      }
+      const selectedUrl =
+        gunkaUrls.shift() ||
+        "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
       console.log(`再生中: ${selectedUrl}`);
       const queue = distube.getQueue(channel)
         ? distube.getQueue(channel)
