@@ -4,7 +4,7 @@ import { SoundCloudPlugin } from "@distube/soundcloud";
 import { config } from "dotenv";
 import fs from "fs";
 import DisTube, { Events } from "distube";
-
+import { completionsToOpenAI } from './text-response'
 config();
 
 function shuffleArray(array: Array<any>) {
@@ -20,14 +20,16 @@ const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID!;
 const GUNKA_URL_PATH: string = process.env.GUNKA_PATH || "";
 const KIMI_GA_YO_URL =
   "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
-// JSONから音源URLを読み込み
-
+const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID || ""
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 const distube = new DisTube(client, {
   plugins: [new SoundCloudPlugin()], // SoundCloudプラグインを追加
 });
+
+
+
 
 let gunkaUrls: Array<string> = [];
 
@@ -95,5 +97,25 @@ client.once("ready", async () => {
     console.error("VCが見つからない！");
   }
 });
+
+
+
+client.on('messageCreate', async message => {
+  if (message.author.bot) {
+    return;
+  };
+  console.log(message, TEXT_CHANNEL_ID)
+  if (message.channel.id === TEXT_CHANNEL_ID) {
+    try {
+      const response = await completionsToOpenAI(message.content)
+      const responseJson = await response.json()
+  
+      message.channel.send(responseJson.choices[0].message.content);
+    } catch (error) {
+      console.log(error)
+    }
+
+  }
+})
 
 client.login(TOKEN);

@@ -7,6 +7,8 @@ services:
       GUILD_ID: ${GUILD_ID}
       VOICE_CHANNEL_ID: ${VOICE_CHANNEL_ID}
       GUNKA_PATH: ${GUNKA_PATH}
+      TEXT_CHANNEL_ID: ${TEXT_CHANNEL_ID}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - ./gunka_urls.json:${GUNKA_PATH}
     tty: true
