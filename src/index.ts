@@ -1,18 +1,18 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { joinVoiceChannel, getVoiceConnection } from "@discordjs/voice";
+import { getVoiceConnection } from "@discordjs/voice";
 import { SoundCloudPlugin } from "@distube/soundcloud";
 import { config } from "dotenv";
 import fs from "fs";
-import DisTube from "distube";
+import DisTube, { Events } from "distube";
 
 config();
 
 const TOKEN = process.env.TOKEN!;
 const GUILD_ID = process.env.GUILD_ID!;
 const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID!;
-
+const GUNKA_URL_PATH: string = process.env.GUNKA_PATH || ""
+const KIMI_GA_YO_URL = 'https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo?in=benjamin-nageotte/sets/hot'
 // JSONから音源URLを読み込み
-const gunkaUrls = JSON.parse(fs.readFileSync("gunka_urls.json", "utf-8")).urls;
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -36,16 +36,49 @@ client.once("ready", async () => {
     distube.voices.join(channel);
 
     // ランダムにURLを選んで再生
-    const playStream = async () => {
+    const playGunka = async () => {
+      const gunkaUrls = JSON.parse(fs.readFileSync(GUNKA_URL_PATH, "utf-8")).urls;
       const randomIndex = Math.floor(Math.random() * gunkaUrls.length); // ランダムにURLを選ぶ
       const selectedUrl = gunkaUrls[randomIndex];
       console.log(`再生中: ${selectedUrl}`);
-
-      // Distubeで音楽を再生
+      const queue = distube.getQueue(channel) ? distube.getQueue(channel) : await distube.queues.create(channel)
+      if (queue) {
+        queue.remove()
+      }
       await distube.play(channel, selectedUrl);
-    };
 
-    playStream();
+    };
+    const playKiminoYo = async () => {
+      console.log('君の代を再生中...');
+      const queue = distube.getQueue(channel) ? distube.getQueue(channel) : await distube.queues.create(channel)
+      if (queue) {
+        queue.remove()
+      }
+      await distube.play(channel, KIMI_GA_YO_URL);
+  };
+    distube.on(Events.FINISH, async (queue) => {
+      if (!queue) return;
+      console.log('軍歌終了、次の軍歌を流します');
+      playGunka();
+    });
+    // 君の代を毎正時（毎時00分）に流す
+    let firstTimePlayKimigaYo = true
+    const scheduleKimigaYo = () => {
+      const now = new Date();
+      let nextTimePlay: Date;
+      if (firstTimePlayKimigaYo)
+        nextTimePlay = new Date(now.setHours(now.getHours(), 17, 0, 0));
+      else nextTimePlay = new Date(now.setHours(now.getHours() + 1, 0, 0, 0));  // 次の正時（00分）
+      firstTimePlayKimigaYo = false;
+      const delay = nextTimePlay.getTime() - Date.now();  // 次の正時までの時間差
+
+      setTimeout(() => {
+          playKiminoYo(); // 正時に君の代を流す
+          setInterval(playKiminoYo, 60 * 60 * 1000);  // その後は毎正時に繰り返す
+      }, delay);
+    };
+    scheduleKimigaYo()
+    playGunka();
   } else {
     console.error("VCが見つからない！");
   }

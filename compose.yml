@@ -1,0 +1,12 @@
+services:
+  housou:
+    build:
+      context: .
+    environment:
+      TOKEN: ${TOKEN}
+      GUILD_ID: ${GUILD_ID}
+      VOICE_CHANNEL_ID: ${VOICE_CHANNEL_ID}
+      GUNKA_PATH: ${GUNKA_PATH}
+    volumes:
+      - ./gunka_urls.json:${GUNKA_PATH}
+    tty: true
