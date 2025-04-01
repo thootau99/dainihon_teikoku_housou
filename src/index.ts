@@ -7,11 +7,12 @@ import DisTube, { Events } from "distube";
 import { completionsToOpenAI } from './text-response'
 config();
 
-function shuffleArray(array: Array<any>) {
-  for (let i = array.length - 1; i >= 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+function randomPick(songs: Array<string>) {
+  if (!songs || songs.length === 0) {
+    return "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
   }
+  const randomIndex = Math.floor(Math.random() * songs.length);
+  return songs[randomIndex];
 }
 
 const TOKEN = process.env.TOKEN!;
@@ -27,9 +28,6 @@ const client = new Client({
 const distube = new DisTube(client, {
   plugins: [new SoundCloudPlugin()], // SoundCloudプラグインを追加
 });
-
-
-
 
 let gunkaUrls: Array<string> = [];
 
@@ -51,11 +49,8 @@ client.once("ready", async () => {
     const playGunka = async () => {
       if (gunkaUrls.length === 0) {
         gunkaUrls = JSON.parse(fs.readFileSync(GUNKA_URL_PATH, "utf-8")).urls;
-        shuffleArray(gunkaUrls);
       }
-      const selectedUrl =
-        gunkaUrls.shift() ||
-        "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
+      const selectedUrl = randomPick(gunkaUrls);
       console.log(`再生中: ${selectedUrl}`);
       const queue = distube.getQueue(channel)
         ? distube.getQueue(channel)
