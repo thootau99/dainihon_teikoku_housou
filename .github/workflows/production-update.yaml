@@ -25,7 +25,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.sha}}
+          tags: ghcr.io/${{ github.repository }}:production
   deploy:
     name: Deploy housou service
     runs-on: ubuntu-latest
