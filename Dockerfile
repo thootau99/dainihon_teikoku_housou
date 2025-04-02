@@ -22,4 +22,5 @@ COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
 
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist/index.js /usr/src/app/index.js
+RUN npm install @discordjs/opus
 CMD ["node", "index.js"]
