@@ -41,8 +41,5 @@ jobs:
           script: |
             set -e
             cd ${HOME}/${GITHUB_REPOSITORY}
-            git reset --hard HEAD
-            git remote prune origin
-            git pull
-            docker compose build
+            docker compose pull
             docker compose up -d
