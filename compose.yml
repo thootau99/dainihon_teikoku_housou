@@ -12,3 +12,4 @@ services:
     volumes:
       - ./gunka_urls.json:${GUNKA_PATH}
     tty: true
+    command: sh
