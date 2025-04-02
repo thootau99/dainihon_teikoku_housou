@@ -99,7 +99,6 @@ client.on('messageCreate', async message => {
   if (message.author.bot) {
     return;
   };
-  console.log(message, TEXT_CHANNEL_ID)
   if (message.channel.id === TEXT_CHANNEL_ID) {
     try {
       const response = await completionsToOpenAI(message.content)

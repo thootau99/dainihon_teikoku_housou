@@ -8,10 +8,8 @@ WORKDIR /usr/src/app
 COPY src/ src/
 COPY tsconfig.json .
 COPY package.json .
-RUN npm install -g pnpm@latest-10
+RUN npm install -g corepack
 RUN --mount=type=cache,target=/root/.npm \
-    pnpm install
+    yarn install
 
-
-RUN pnpm build
-CMD node lib/index.js
+CMD yarn production
