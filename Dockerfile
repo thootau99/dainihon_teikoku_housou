@@ -1,8 +1,7 @@
 # ビルド用
 FROM node:20-alpine AS builder
 
-COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
-COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
+RUN apk update && apk add ffmpeg --no-cache
 
 WORKDIR /usr/src/app
 
@@ -17,10 +16,12 @@ RUN ncc build src/index.ts -o dist/
 
 # プロダクション用
 FROM node:20-alpine AS production
-COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
-COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
+RUN apk update && apk add ffmpeg --no-cache
 
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist/index.js /usr/src/app/index.js
 RUN npm install @discordjs/opus
+RUN chown -R node:node ./node_modules && chown node:node ./index.js
+
+USER node
 CMD ["node", "index.js"]
