@@ -1,0 +1,28 @@
+name: Production project update
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Deploy housou service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to remote server and rebuild project
+        uses: appleboy/ssh-action@v1
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USERNAME }}
+          key: ${{ secrets.PRODUCTION_KEY }}
+          port: ${{ secrets.PRODUCTION_PORT }}
+          env: 
+          script: |
+            set -e
+            cd ${HOME}/${GITHUB_REPOSITORY}
+            git reset --hard HEAD
+            git remote prune origin
+            git pull
+            docker compose build
+            docker compose up -d
