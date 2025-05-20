@@ -21,6 +21,7 @@ RUN apk update && apk add ffmpeg --no-cache
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist/index.js /usr/src/app/index.js
 RUN npm install @discordjs/opus
+RUN npm install --save sqlite3
 RUN chown -R node:node ./node_modules && chown node:node ./index.js
 
 USER node
