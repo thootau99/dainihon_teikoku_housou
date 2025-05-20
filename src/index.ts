@@ -4,7 +4,9 @@ import { SoundCloudPlugin } from "@distube/soundcloud";
 import { config } from "dotenv";
 import fs from "fs";
 import DisTube, { Events } from "distube";
-import { completionsToOpenAI } from './text-response'
+import { completionsToOpenAI } from "./text-response";
+import { selectTopGrammar } from "./db/db";
+import { Database } from "sqlite3";
 config();
 
 function randomPick(songs: Array<string>) {
@@ -19,11 +21,20 @@ const TOKEN = process.env.TOKEN!;
 const GUILD_ID = process.env.GUILD_ID!;
 const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID!;
 const GUNKA_URL_PATH: string = process.env.GUNKA_PATH || "";
+const DATABASE_PATH: string = process.env.DATABASE_PATH || "./jlpt-bot.db";
 const KIMI_GA_YO_URL =
   "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
-const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID || ""
+const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID || "";
+const GRAMMAR_CHANNEL_WEBHOOK = process.env.GRAMMAR_CHANNEL_WEBHOOK || "";
+const db = new Database(DATABASE_PATH);
+
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 const distube = new DisTube(client, {
   plugins: [new SoundCloudPlugin()], // SoundCloudプラグインを追加
@@ -60,6 +71,7 @@ client.once("ready", async () => {
       }
       await distube.play(channel, selectedUrl);
     };
+
     const playKiminoYo = async () => {
       console.log("君の代を再生中...");
       const queue = distube.getQueue(channel)
@@ -88,28 +100,37 @@ client.once("ready", async () => {
     };
     scheduleKimigaYo();
     playGunka();
+    const grammarData = await selectTopGrammar(db).then((result) =>
+      console.log(result)
+    );
+    try {
+      await fetch(GRAMMAR_CHANNEL_WEBHOOK, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: grammarData }),
+      });
+    } catch {}
   } else {
     console.error("VCが見つからない！");
   }
 });
 
-
-
-client.on('messageCreate', async message => {
+client.on("messageCreate", async (message) => {
   if (message.author.bot) {
     return;
-  };
+  }
   if (message.channel.id === TEXT_CHANNEL_ID) {
     try {
-      const response = await completionsToOpenAI(message.content)
-      const responseJson = await response.json()
-  
+      const response = await completionsToOpenAI(message.content);
+      const responseJson = await response.json();
+
       message.channel.send(responseJson.choices[0].message.content);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-
   }
-})
+});
 
 client.login(TOKEN);
