@@ -24,7 +24,7 @@ RUN npm install @discordjs/opus
 RUN npm install --save sqlite3
 RUN mkdir -p /usr/src/app/build/Release
 RUN cp /usr/src/app/node_modules/sqlite3/build/Release/node_sqlite3.node /usr/src/app/build/Release
-RUN chown -R /usr/src/app
+RUN chown -R node:node /usr/src/app
 
 USER node
 CMD ["node", "index.js"]
