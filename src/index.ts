@@ -73,7 +73,7 @@ client.once("ready", async () => {
     };
 
     const playKiminoYo = async () => {
-      console.log("君の代を再生中...");
+      console.log("君が代を再生中...");
       const queue = distube.getQueue(channel)
         ? distube.getQueue(channel)
         : await distube.queues.create(channel);
@@ -87,31 +87,30 @@ client.once("ready", async () => {
       console.log("軍歌終了、次の軍歌を流します");
       playGunka();
     });
-    // 君の代を毎正時（毎時00分）に流す
+    // 君が代を毎正時（毎時00分）に流す
     const scheduleKimigaYo = () => {
       const now = new Date();
       const nextTimePlay = new Date(now.setHours(now.getHours() + 1, 0, 0, 0)); // 次の正時（00分）
       const delay = nextTimePlay.getTime() - Date.now(); // 次の正時までの時間差
 
       setTimeout(() => {
-        playKiminoYo(); // 正時に君の代を流す
+        playKiminoYo(); // 正時に君が代を流す
         setInterval(playKiminoYo, 60 * 60 * 1000); // その後は毎正時に繰り返す
       }, delay);
     };
     scheduleKimigaYo();
     playGunka();
-    const grammarData = await selectTopGrammar(db).then((result) =>
-      console.log(result)
-    );
-    try {
-      await fetch(GRAMMAR_CHANNEL_WEBHOOK, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content: grammarData }),
-      });
-    } catch {}
+    await selectTopGrammar(db).then(async (result) => {
+      try {
+        await fetch(GRAMMAR_CHANNEL_WEBHOOK, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content: result }),
+        });
+      } catch {}
+    });
   } else {
     console.error("VCが見つからない！");
   }
