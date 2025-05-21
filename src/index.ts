@@ -109,7 +109,9 @@ client.once("ready", async () => {
           },
           body: JSON.stringify({ content: result }),
         });
-      } catch {}
+      } catch (e) {
+      	console.log(e)
+      }
     });
   } else {
     console.error("VCが見つからない！");
