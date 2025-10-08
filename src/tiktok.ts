@@ -15,9 +15,9 @@ export async function download(req: TiktokTTSRequest, success: any) {
   const session = req.tiktokSessionId || "";
   const audioUUID = randomUUID();
   config(session);
-  const result = await new Promise((resolve, reject) => {
+  const result = await new Promise(async (resolve, reject) => {
     try {
-      createAudioFromText(text, `./audio-output/${audioUUID}`, speaker);
+      await createAudioFromText(text, `./audio-output/${audioUUID}`, speaker);
       resolve(true);
     } catch (e) {
       console.log(e);
