@@ -22,7 +22,8 @@ RUN apk update && apk add ffmpeg --no-cache
 
 # WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist/index.js /usr/src/app/index.js
-RUN npm install @discordjs/opus
+WORKDIR /usr/src/app
+RUN npm install @discordjs/opus --verbose
 RUN npm install --save sqlite3
 RUN mkdir -p /usr/src/app/build/Release
 RUN cp /usr/src/app/node_modules/sqlite3/build/Release/node_sqlite3.node /usr/src/app/build/Release
