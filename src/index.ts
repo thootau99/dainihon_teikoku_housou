@@ -7,6 +7,7 @@ import DisTube, { Events } from "distube";
 import { completionsToOpenAI } from "./text-response";
 import { selectTopGrammar } from "./db/db";
 import { Database } from "sqlite3";
+import { download } from './tiktok'
 config();
 
 function randomPick(songs: Array<string>) {
@@ -27,6 +28,8 @@ const KIMI_GA_YO_URL =
 const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID || "";
 const GRAMMAR_CHANNEL_WEBHOOK = process.env.GRAMMAR_CHANNEL_WEBHOOK || "";
 const db = new Database(DATABASE_PATH);
+
+let tiktok_cache = process.env.TIKTOK_CACHE || "";
 
 const client = new Client({
   intents: [
@@ -130,6 +133,32 @@ client.on("messageCreate", async (message) => {
       message.channel.send(responseJson.choices[0].message.content);
     } catch (error) {
       console.log(error);
+    }
+  } else (message.channel.id === AUDIO_GENERATE_CHANNEL_ID) {
+    try {
+      const [ instruction, content ] = message.content.split("|")
+
+      switch (instruction) {
+        case "generate":
+          const [speaker, text, tiktokSessionId] = content.split(",")
+          const request = {
+            speaker,
+            text,
+            tiktokSessionId
+          }
+
+          const outputFile = await download(request);
+          await message.channel.send({
+            files: [outputFile]
+          });
+          break;
+        case "set-session":
+          tiktok_cache = content;
+          break;
+        case "list-ppl":
+          message.channel.send("jp_001\njp_003\njp_005\njp_006\njp_female_fujicochan\njp_female_hasegawariona\njp_male_keiichinakano\njp_female_oomaeaika\njp_male_yujinchigusa\njp_female_shirou\njp_male_tamawakazuki\njp_female_kaorishoji\njp_female_yagishaki\njp_male_hikakin\njp_female_rei\njp_male_shuichiro\njp_male_matsudake\njp_female_machikoriiita\njp_male_matsuo\njp_male_osada")
+          break;
+      }
     }
   }
 });
