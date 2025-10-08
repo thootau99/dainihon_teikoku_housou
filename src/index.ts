@@ -160,6 +160,8 @@ client.on("messageCreate", async (message) => {
           message.channel.send("jp_001\njp_003\njp_005\njp_006\njp_female_fujicochan\njp_female_hasegawariona\njp_male_keiichinakano\njp_female_oomaeaika\njp_male_yujinchigusa\njp_female_shirou\njp_male_tamawakazuki\njp_female_kaorishoji\njp_female_yagishaki\njp_male_hikakin\njp_female_rei\njp_male_shuichiro\njp_male_matsudake\njp_female_machikoriiita\njp_male_matsuo\njp_male_osada")
           break;
       }
+    } catch (e) {
+      console.log(e)
     }
   }
 });
