@@ -1,4 +1,5 @@
 import {config, createAudioFromText} from 'tiktok-tts';
+import { randomUUID } from 'crypto';
 interface TiktokTTSRequest {
     speaker: string
     text: string
@@ -16,10 +17,9 @@ async function download(req: TiktokTTSRequest) {
   await new Promise((resolve, reject) => {
     try {
         createAudioFromText(text, `/audio-output/${audioUUID}`, speaker);
-        resolve(void)
+        resolve(void);
     } catch (e) {
-        console.log(e)
-        reject(void)
+        console.log(e);
     }
   })  
   

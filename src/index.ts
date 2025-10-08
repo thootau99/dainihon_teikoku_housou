@@ -27,6 +27,7 @@ const KIMI_GA_YO_URL =
   "https://soundcloud.com/hugh-mcguire-2/japanese-national-anthem-kimi-ga-yo";
 const TEXT_CHANNEL_ID = process.env.TEXT_CHANNEL_ID || "";
 const GRAMMAR_CHANNEL_WEBHOOK = process.env.GRAMMAR_CHANNEL_WEBHOOK || "";
+const AUDIO_GENERATE_CHANNEL_ID = process.env.AUDIO_GENERATE_CHANNEL_ID || "";
 const db = new Database(DATABASE_PATH);
 
 let tiktok_cache = process.env.TIKTOK_CACHE || "";
@@ -134,7 +135,7 @@ client.on("messageCreate", async (message) => {
     } catch (error) {
       console.log(error);
     }
-  } else (message.channel.id === AUDIO_GENERATE_CHANNEL_ID) {
+  } else if (message.channel.id === AUDIO_GENERATE_CHANNEL_ID) {
     try {
       const [ instruction, content ] = message.content.split("|")
 
