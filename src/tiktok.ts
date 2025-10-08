@@ -6,7 +6,7 @@ interface TiktokTTSRequest {
   tiktokSessionId: string;
 }
 
-async function download(req: TiktokTTSRequest) {
+export async function download(req: TiktokTTSRequest) {
   console.log("download request:", req);
 
   const speaker = req.speaker || "unknown";
