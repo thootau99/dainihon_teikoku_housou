@@ -134,11 +134,11 @@ client.on("messageCreate", async (message) => {
 
       switch (instruction) {
         case "generate":
-          const [speaker, text, tiktokSessionId] = content.split(",");
+          const [speaker, text] = content.split(",");
           const request = {
             speaker,
             text,
-            tiktokSessionId,
+            tiktokSessionId: tiktok_cache,
           };
           const successPromise = await new Promise(async (resolve, reject) => {
             await download(request, resolve);
