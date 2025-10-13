@@ -26,6 +26,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
   deploy:
     name: Deploy housou service
     runs-on: ubuntu-latest

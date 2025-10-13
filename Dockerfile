@@ -6,9 +6,10 @@ RUN apk update && apk add ffmpeg --no-cache
 WORKDIR /usr/src/app
 
 ## COPYコマンドをまとめてイメージのレイヤーを減らす
-COPY tsconfig.json package.json ./
-RUN npm install -g corepack @vercel/ncc && \
-    npm i
+COPY tsconfig.json package.json yarn.lock ./
+RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn YARN_ENABLE_GLOBAL_CACHE=false \
+    npm install -g corepack @vercel/ncc && \
+    yarn
 
 ## node_modules などを一つのJSに格納する
 COPY src/ src/
